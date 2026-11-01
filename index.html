@@ -77,7 +77,8 @@ line-height:1.55;
 .lead p strong{color:var(--ink)}
 /* ---------- result ---------- */
 .result{
-position:sticky;top:10px;z-index:20;
+position:relative;
+margin-top:14px;
 background:var(--navy);color:#fff;
 border-radius:var(--radius-lg);
 padding:18px 18px 16px;
@@ -88,6 +89,7 @@ overflow:hidden;
 content:"";position:absolute;inset:0 0 auto 0;height:4px;background:#ff9900;
 }
 .result-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.result-title{margin:0 0 12px;font-size:15px;font-weight:900;letter-spacing:.02em;color:#fff}
 .result-label{font-size:12.5px;font-weight:700;letter-spacing:.06em;color:#aeb9c5;margin:2px 0 2px}
 .profit{font-size:44px;line-height:1;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .profit small{font-size:20px;font-weight:700;margin-right:2px;color:#cbd4dd}
@@ -206,45 +208,8 @@ transition:opacity.2s ease, transform.2s ease;z-index:50;box-shadow:var(--shadow
 <body>
 <main class="wrap">
 <div class="lead">
-<p><strong>売値と仕入れを入れるだけ。</strong>販売手数料と送料を引いて、利益と利益率がその場で出ます。</p>
+<p><strong>売値と仕入れを入れるだけ。</strong>販売手数料と送料を引いた利益と利益率は、入力欄の下の結果に出ます。</p>
 </div>
-
-<!-- RESULT -->
-<section class="result" aria-live="polite" aria-label="計算結果">
-<div class="result-top">
-<div>
-<p class="result-label">利益（手取り）</p>
-<div class="profit is-gain" id="profit"><small>¥</small>0</div>
-</div>
-<div class="badges">
-<span class="badge" id="marginBadge">利益率 <b>—</b></span>
-<span class="badge" id="roiBadge">ROI <b>—</b></span>
-</div>
-</div>
-
-<div class="bar" aria-hidden="true">
-<div class="bar-track">
-<span class="bar-cost" id="barCost" style="width:0%"></span>
-<span class="bar-fee" id="barFee" style="width:0%"></span>
-<span class="bar-ship" id="barShip" style="width:0%"></span>
-<span class="bar-profit" id="barProfit" style="width:0%"></span>
-</div>
-<div class="bar-legend">
-<span><i style="background:#8fa0b3"></i>仕入れ</span>
-<span><i style="background:#ff9900"></i>販売手数料</span>
-<span><i style="background:#3e92cc"></i>配送・その他</span>
-<span><i style="background:#2fbd97"></i>利益</span>
-</div>
-</div>
-
-<div class="breakdown">
-<div class="row"><span>販売価格</span><b id="bdPrice">¥0</b></div>
-<div class="row"><span>− 販売手数料</span><b id="bdFee">¥0</b></div>
-<div class="row"><span id="bdShipLabel">− 配送（FBA）</span><b id="bdShip">¥0</b></div>
-<div class="row"><span id="bdCostLabel">− 仕入れ価格</span><b id="bdCost">¥0</b></div>
-<div class="row total"><span>合計コスト</span><b id="bdTotal">¥0</b></div>
-</div>
-</section>
 
 <!-- 1. PRICE -->
 <section class="card">
@@ -357,6 +322,44 @@ transition:opacity.2s ease, transform.2s ease;z-index:50;box-shadow:var(--shadow
 <div class="field">
 <label for="other">その他経費 <span class="sub">仕入れ送料を1点換算したものなど・任意</span></label>
 <div class="money"><span class="yen">¥</span><input id="other" type="number" inputmode="numeric" min="0" value="0" placeholder="0"></div>
+</div>
+</section>
+
+<!-- RESULT -->
+<section class="result" aria-live="polite" aria-label="計算結果">
+<h2 class="result-title">計算結果</h2>
+<div class="result-top">
+<div>
+<p class="result-label">利益（手取り）</p>
+<div class="profit is-gain" id="profit"><small>¥</small>0</div>
+</div>
+<div class="badges">
+<span class="badge" id="marginBadge">利益率 <b>—</b></span>
+<span class="badge" id="roiBadge">ROI <b>—</b></span>
+</div>
+</div>
+
+<div class="bar" aria-hidden="true">
+<div class="bar-track">
+<span class="bar-cost" id="barCost" style="width:0%"></span>
+<span class="bar-fee" id="barFee" style="width:0%"></span>
+<span class="bar-ship" id="barShip" style="width:0%"></span>
+<span class="bar-profit" id="barProfit" style="width:0%"></span>
+</div>
+<div class="bar-legend">
+<span><i style="background:#8fa0b3"></i>仕入れ</span>
+<span><i style="background:#ff9900"></i>販売手数料</span>
+<span><i style="background:#3e92cc"></i>配送・その他</span>
+<span><i style="background:#2fbd97"></i>利益</span>
+</div>
+</div>
+
+<div class="breakdown">
+<div class="row"><span>販売価格</span><b id="bdPrice">¥0</b></div>
+<div class="row"><span>− 販売手数料</span><b id="bdFee">¥0</b></div>
+<div class="row"><span id="bdShipLabel">− 配送（FBA）</span><b id="bdShip">¥0</b></div>
+<div class="row"><span id="bdCostLabel">− 仕入れ価格</span><b id="bdCost">¥0</b></div>
+<div class="row total"><span>合計コスト</span><b id="bdTotal">¥0</b></div>
 </div>
 </section>
 
