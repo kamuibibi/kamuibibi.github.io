@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Amazon計算機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#f4f4f1;
+--card:#ffffff;
+--card-2:#fbfbF8;
+--ink:#141a22;
+--ink-2:#3c4754;
+--muted:#6b7684;
+--line:#e3e1da;
+--line-strong:#d2cfc6;
+--accent:#d96c00;
+--accent-ink:#b85c00;
+--accent-soft:#fff1de;
+--navy:#131a22;
+--navy-2:#232f3d;
+--green:#067a5e;
+--green-soft:#e3f4ee;
+--red:#c0271a;
+--red-soft:#fdecea;
+--chip:#eef0f2;
+--chip-active:#131a22;
+--input-bg:#ffffff;
+--shadow:0 10px 30px rgba(20,26,34,.08), 0 2px 6px rgba(20,26,34,.06);
+--radius-lg:20px;
+--radius-md:14px;
+--radius-sm:10px;
+}
+@media (prefers-color-scheme: dark){
+:root{
+--bg:#0f1318;
+--card:#1a212b;
+--card-2:#1f2833;
+--ink:#f2f4f6;
+--ink-2:#c7cfd8;
+--muted:#96a2b0;
+--line:#2c3642;
+--line-strong:#3a4655;
+--accent:#ff9900;
+--accent-ink:#ffab2e;
+--accent-soft:#33260f;
+--navy:#0b0f14;
+--navy-2:#1c2632;
+--green:#2fbd97;
+--green-soft:#12352c;
+--red:#ff7a6e;
+--red-soft:#3a1d1a;
+--chip:#242f3d;
+--chip-active:#f2f4f6;
+--input-bg:#141b24;
+--shadow:0 10px 30px rgba(0,0,0,.35);
+}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+margin:0;
+background:var(--bg);
+color:var(--ink);
+font-family:"Noto Sans JP",system-ui,-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;
+font-feature-settings:"tnum" 1;
+line-height:1.55;
+}
+.wrap{max-width:680px;margin:0 auto;padding:14px 14px 40px}
+.lead{padding:6px 2px 12px}
+.lead p{margin:0;font-size:14.5px;color:var(--ink-2);font-weight:500}
+.lead p strong{color:var(--ink)}
+/* ---------- result ---------- */
+.result{
+position:sticky;top:10px;z-index:20;
+background:var(--navy);color:#fff;
+border-radius:var(--radius-lg);
+padding:18px 18px 16px;
+box-shadow:var(--shadow);
+overflow:hidden;
+}
+.result::before{
+content:"";position:absolute;inset:0 0 auto 0;height:4px;background:#ff9900;
+}
+.result-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.result-label{font-size:12.5px;font-weight:700;letter-spacing:.06em;color:#aeb9c5;margin:2px 0 2px}
+.profit{font-size:44px;line-height:1;font-weight:900;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.profit small{font-size:20px;font-weight:700;margin-right:2px;color:#cbd4dd}
+.profit.is-loss{color:#ff8a7a}
+.profit.is-gain{color:#ffffff}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{
+background:var(--navy-2);border:1px solid rgba(255,255,255,.12);
+border-radius:999px;padding:6px 10px;font-size:12.5px;font-weight:700;color:#dbe2ea;white-space:nowrap;
+}
+.badge b{color:#fff;font-variant-numeric:tabular-nums}
+.badge.warn b{color:#ff8a7a}
+.bar{margin-top:16px}
+.bar-track{display:flex;height:10px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.14)}
+.bar-track span{display:block;height:100%;min-width:0;transition:width.25s ease}
+.bar-cost{background:#8fa0b3}
+.bar-fee{background:#ff9900}
+.bar-ship{background:#3e92cc}
+.bar-profit{background:#2fbd97}
+.bar-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:11.5px;color:#aeb9c5;font-weight:500}
+.bar-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+.breakdown{margin-top:14px;border-top:1px solid rgba(255,255,255,.12);padding-top:12px;display:grid;gap:7px}
+.breakdown > .row{display:flex;justify-content:space-between;gap:16px;font-size:13.5px;color:#c3cdd7}
+.breakdown > .row b{color:#fff;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.breakdown > .row.total{border-top:1px dashed rgba(255,255,255,.18);padding-top:9px;margin-top:2px;color:#fff;font-weight:700}
+/* ---------- cards / forms ---------- */
+.card{
+background:var(--card);border:1px solid var(--line);
+border-radius:var(--radius-lg);padding:18px;margin-top:14px;box-shadow:0 1px 2px rgba(20,26,34,.03);
+}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:900;letter-spacing:.01em;display:flex;align-items:center;gap:8px}
+.card h2 > .num{
+display:inline-flex;align-items:center;justify-content:center;
+width:22px;height:22px;border-radius:7px;background:var(--ink);color:var(--card);
+font-size:12px;font-weight:900;flex:none;
+}
+.card > .hint{margin:0 0 14px;font-size:12.5px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}.profit{font-size:38px}}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink-2)}
+.field label > .sub{font-weight:500;color:var(--muted);font-size:11.5px}
+.money{
+display:flex;align-items:center;background:var(--input-bg);
+border:1.5px solid var(--line-strong);border-radius:var(--radius-md);overflow:hidden;
+transition:border-color.15s ease, box-shadow.15s ease;
+}
+.money:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.money > .yen{padding:0 4px 0 13px;font-weight:700;color:var(--muted);font-size:15px}
+.money input{
+width:100%;border:0;outline:0;background:transparent;color:var(--ink);
+font:inherit;font-size:19px;font-weight:700;padding:12px 12px 12px 2px;text-align:right;font-variant-numeric:tabular-nums;
+}
+.money input::placeholder{color:var(--muted);font-weight:500}
+.money > .suffix{padding-right:12px;font-size:12.5px;color:var(--muted);font-weight:700;white-space:nowrap}
+select{
+width:100%;appearance:none;-webkit-appearance:none;
+background:var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b7684' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+border:1.5px solid var(--line-strong);border-radius:var(--radius-md);
+color:var(--ink);font:inherit;font-size:15px;font-weight:700;padding:12px 38px 12px 13px;outline:0;
+}
+select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.fee-preview{
+margin-top:10px;background:var(--accent-soft);border-radius:var(--radius-sm);
+padding:9px 12px;font-size:13px;color:var(--ink-2);display:flex;justify-content:space-between;gap:12px;
+}
+.fee-preview b{color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* segmented */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--chip);padding:5px;border-radius:12px;margin-bottom:14px}
+.seg button{
+border:0;cursor:pointer;font:inherit;font-weight:800;font-size:14.5px;
+padding:11px 8px;border-radius:9px;background:transparent;color:var(--muted);
+}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(20,26,34,.14)}
+.seg button small{display:block;font-size:11px;font-weight:500;margin-top:1px}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{
+border:1.5px solid var(--line-strong);background:var(--card);color:var(--ink-2);
+font:inherit;font-size:13px;font-weight:700;padding:8px 11px;border-radius:999px;cursor:pointer;text-align:left;
+}
+.chip span{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--chip-active);border-color:var(--chip-active);color:var(--bg)}
+.chip[aria-pressed="true"] span{color:inherit;opacity:.75}
+@media (prefers-color-scheme: dark){.chip[aria-pressed="true"]{color:#10151b}}
+.panel[hidden]{display:none}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.btn{
+flex:1;min-width:150px;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:14.5px;
+border-radius:12px;padding:13px 14px;
+}
+.btn-primary{background:var(--ink);color:var(--card)}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1.5px solid var(--line-strong);flex:0 1 auto}
+.btn:active{transform:translateY(1px)}
+.breakeven{
+display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+background:var(--card-2);border:1px dashed var(--line-strong);border-radius:var(--radius-md);padding:13px 14px;margin-top:4px;
+}
+.breakeven > .k{font-size:13px;font-weight:700;color:var(--ink-2)}
+.breakeven > .k small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;margin-top:2px;max-width:340px}
+.breakeven > .v{font-size:21px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
+.verdict{margin-top:12px;font-size:13.5px;font-weight:700;padding:11px 13px;border-radius:var(--radius-sm);display:none}
+.verdict.show{display:block}
+.verdict.good{background:var(--green-soft);color:var(--green)}
+.verdict.bad{background:var(--red-soft);color:var(--red)}
+.note{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7;padding:0 4px}
+.note a{color:var(--accent-ink);font-weight:700}
+.toast{
+position:fixed;left:50%;bottom:22px;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+background:var(--ink);color:var(--card);font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;
+transition:opacity.2s ease, transform.2s ease;z-index:50;box-shadow:var(--shadow);
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<div class="lead">
+<p><strong>売値と仕入れを入れるだけ。</strong>販売手数料と送料を引いて、利益と利益率がその場で出ます。</p>
+</div>
+
+<!-- RESULT -->
+<section class="result" aria-live="polite" aria-label="計算結果">
+<div class="result-top">
+<div>
+<p class="result-label">利益（手取り）</p>
+<div class="profit is-gain" id="profit"><small>¥</small>0</div>
+</div>
+<div class="badges">
+<span class="badge" id="marginBadge">利益率 <b>—</b></span>
+<span class="badge" id="roiBadge">ROI <b>—</b></span>
+</div>
+</div>
+
+<div class="bar" aria-hidden="true">
+<div class="bar-track">
+<span class="bar-cost" id="barCost" style="width:0%"></span>
+<span class="bar-fee" id="barFee" style="width:0%"></span>
+<span class="bar-ship" id="barShip" style="width:0%"></span>
+<span class="bar-profit" id="barProfit" style="width:0%"></span>
+</div>
+<div class="bar-legend">
+<span><i style="background:#8fa0b3"></i>仕入れ</span>
+<span><i style="background:#ff9900"></i>販売手数料</span>
+<span><i style="background:#3e92cc"></i>配送・その他</span>
+<span><i style="background:#2fbd97"></i>利益</span>
+</div>
+</div>
+
+<div class="breakdown">
+<div class="row"><span>販売価格</span><b id="bdPrice">¥0</b></div>
+<div class="row"><span>− 販売手数料</span><b id="bdFee">¥0</b></div>
+<div class="row"><span id="bdShipLabel">− 配送（FBA）</span><b id="bdShip">¥0</b></div>
+<div class="row"><span id="bdCostLabel">− 仕入れ価格</span><b id="bdCost">¥0</b></div>
+<div class="row total"><span>合計コスト</span><b id="bdTotal">¥0</b></div>
+</div>
+</section>
+
+<!-- 1. PRICE -->
+<section class="card">
+<h2><span class="num">1</span>価格</h2>
+<p class="hint">Amazonでの販売価格と、仕入れた金額を入れてください。</p>
+<div class="grid2">
+<div class="field">
+<label for="price">販売価格 <span class="sub">税込</span></label>
+<div class="money"><span class="yen">¥</span><input id="price" type="number" inputmode="numeric" min="0" placeholder="例：4,980" value="4980"></div>
+</div>
+<div class="field">
+<label for="cost">仕入れ価格 <span class="sub">1点あたり</span></label>
+<div class="money"><span class="yen">¥</span><input id="cost" type="number" inputmode="numeric" min="0" placeholder="例：2,200" value="2200"></div>
+</div>
+</div>
+
+<div style="height:14px"></div>
+<div class="grid2">
+<div class="field">
+<label for="category">カテゴリ</label>
+<select id="category">
+<option value="10" selected>アクセサリー・ジュエリー</option>
+<option value="10">時計</option>
+<option value="12">バッグ・ブランド小物</option>
+<option value="12">衣料品・シューズ</option>
+<option value="10">おもちゃ・ホビー（カード含む）</option>
+<option value="10">ビューティー</option>
+<option value="8">ヘルス＆パーソナルケア</option>
+<option value="8">エレクトロニクス・家電</option>
+<option value="8">パソコン・周辺機器</option>
+<option value="15">ホーム＆キッチン</option>
+<option value="15">本・コミック</option>
+<option value="15">ミュージック・DVD・ゲーム</option>
+<option value="10">スポーツ＆アウトドア</option>
+<option value="15">ペット用品</option>
+<option value="8">ベビー用品</option>
+<option value="8">食品・飲料</option>
+<option value="15">その他</option>
+</select>
+</div>
+<div class="field">
+<label for="feeRate">販売手数料率 <span class="sub">カテゴリで自動入力・変更OK</span></label>
+<div class="money"><input id="feeRate" type="number" inputmode="decimal" min="0" max="60" step="0.1" value="10" style="padding-left:12px"><span class="suffix">%</span></div>
+</div>
+</div>
+<div class="fee-preview"><span>販売手数料の目安</span><b id="feePreview">¥498</b></div>
+</section>
+
+<!-- 2. SHIPPING -->
+<section class="card">
+<h2><span class="num">2</span>送料・配送</h2>
+<p class="hint">FBAか、自分で発送かで切り替えてください。金額は目安で、そのまま書き換えられます。</p>
+
+<div class="seg" role="group" aria-label="配送方法">
+<button type="button" id="modeFba" aria-pressed="true">FBA<small>Amazonに発送を任せる</small></button>
+<button type="button" id="modeSelf" aria-pressed="false">自己発送<small>自分で梱包・発送する</small></button>
+</div>
+
+<!-- FBA -->
+<div class="panel" id="panelFba">
+<div class="field" style="margin-bottom:10px">
+<label>サイズ区分 <span class="sub">タップすると手数料が入ります</span></label>
+</div>
+<div class="chips" id="fbaChips">
+<button type="button" class="chip" data-fee="288" aria-pressed="false">小型・軽量<span>カード・薄い小物 / ¥288</span></button>
+<button type="button" class="chip" data-fee="468" aria-pressed="true">標準サイズ 1<span>〜35×30×3.3cm / ¥468</span></button>
+<button type="button" class="chip" data-fee="554" aria-pressed="false">標準サイズ 2<span>〜40×35×13cm / ¥554</span></button>
+<button type="button" class="chip" data-fee="618" aria-pressed="false">標準サイズ 3<span>〜45×40×20cm / ¥618</span></button>
+<button type="button" class="chip" data-fee="755" aria-pressed="false">大型 1<span>〜60×50×50cm / ¥755</span></button>
+<button type="button" class="chip" data-fee="1055" aria-pressed="false">大型 2<span>〜80×60×60cm / ¥1,055</span></button>
+</div>
+<div class="grid2">
+<div class="field">
+<label for="fbaFee">FBA配送代行手数料</label>
+<div class="money"><span class="yen">¥</span><input id="fbaFee" type="number" inputmode="numeric" min="0" value="468"></div>
+</div>
+<div class="field">
+<label for="storage">保管料など <span class="sub">1点あたり換算・任意</span></label>
+<div class="money"><span class="yen">¥</span><input id="storage" type="number" inputmode="numeric" min="0" value="0" placeholder="0"></div>
+</div>
+</div>
+</div>
+
+<!-- SELF -->
+<div class="panel" id="panelSelf" hidden>
+<div class="field" style="margin-bottom:10px">
+<label>送料の目安 <span class="sub">タップすると送料が入ります</span></label>
+</div>
+<div class="chips" id="shipChips">
+<button type="button" class="chip" data-fee="185" aria-pressed="false">クリックポスト<span>¥185</span></button>
+<button type="button" class="chip" data-fee="230" aria-pressed="false">ゆうパケット<span>¥230</span></button>
+<button type="button" class="chip" data-fee="370" aria-pressed="false">レターパックライト<span>¥370</span></button>
+<button type="button" class="chip" data-fee="385" aria-pressed="true">ネコポス<span>¥385</span></button>
+<button type="button" class="chip" data-fee="520" aria-pressed="false">レターパックプラス<span>¥520</span></button>
+<button type="button" class="chip" data-fee="750" aria-pressed="false">宅急便 60サイズ<span>¥750</span></button>
+</div>
+<div class="grid2">
+<div class="field">
+<label for="shipFee">送料</label>
+<div class="money"><span class="yen">¥</span><input id="shipFee" type="number" inputmode="numeric" min="0" value="385"></div>
+</div>
+<div class="field">
+<label for="packing">梱包資材費</label>
+<div class="money"><span class="yen">¥</span><input id="packing" type="number" inputmode="numeric" min="0" value="50" placeholder="0"></div>
+</div>
+</div>
+</div>
+
+<div style="height:14px"></div>
+<div class="field">
+<label for="other">その他経費 <span class="sub">仕入れ送料を1点換算したものなど・任意</span></label>
+<div class="money"><span class="yen">¥</span><input id="other" type="number" inputmode="numeric" min="0" value="0" placeholder="0"></div>
+</div>
+</section>
+
+<!-- 3. JUDGE -->
+<section class="card">
+<h2><span class="num">3</span>損益分岐点</h2>
+<p class="hint">赤字にならない最低ラインの販売価格です。</p>
+<div class="breakeven">
+<div class="k">これ以上で売れば黒字<small>販売手数料率と今の配送コストで計算しています</small></div>
+<div class="v" id="breakeven">¥—</div>
+</div>
+<div class="verdict" id="verdict"></div>
+<div class="actions">
+<button type="button" class="btn btn-primary" id="copyBtn">結果をコピーする</button>
+<button type="button" class="btn btn-ghost" id="resetBtn">リセット</button>
+</div>
+</section>
+
+<p class="note">
+※ 販売手数料率・FBA手数料・送料は目安です。実際の金額は商品サイズ・重量・地域・契約で変わるため、出品前に
+<a href="https://sellercentral.amazon.co.jp/" target="_blank" rel="noopener">セラーセントラル</a>
+の最新の料金表で確認してください。大口出品の月額登録料（¥4,900／月）はこの計算には含めていません。
+</p>
+</main>
+
+<div class="toast" id="toast" role="status">コピーしました</div>
+
+<script>
+(function(){
+var $ = function(id){ return document.getElementById(id);};
+var priceEl=$('price'), costEl=$('cost'), catEl=$('category'), rateEl=$('feeRate');
+var fbaFeeEl=$('fbaFee'), storageEl=$('storage'), shipFeeEl=$('shipFee'), packingEl=$('packing'), otherEl=$('other');
+var mode = 'fba';
+
+function num(el){
+var v = parseFloat(el.value);
+return isNaN(v) || v < 0? 0: v;
+}
+function yen(n){
+return '¥' + Math.round(n).toLocaleString('ja-JP');
+}
+function setProfit(amount){
+var el = $('profit');
+var sign = amount < 0? '−': '';
+el.innerHTML = '<small>¥</small>' + sign + Math.abs(Math.round(amount)).toLocaleString('ja-JP');
+el.classList.toggle('is-loss', amount < 0);
+el.classList.toggle('is-gain', amount >= 0);
+}
+
+function calc(){
+var price = num(priceEl);
+var cost = num(costEl);
+var rate = num(rateEl);
+var fee = Math.round(price * rate / 100);
+var other = num(otherEl);
+var delivery, deliveryLabel, extra;
+if(mode === 'fba'){
+extra = num(storageEl);
+delivery = num(fbaFeeEl) + extra;
+deliveryLabel = '− 配送（FBA＋保管料）';
+} else {
+extra = num(packingEl);
+delivery = num(shipFeeEl) + extra;
+deliveryLabel = '− 配送（送料＋梱包）';
+}
+var totalCost = cost + fee + delivery + other;
+var profit = price - totalCost;
+
+setProfit(profit);
+$('feePreview').textContent = yen(fee) + '（' + rate + '%）';
+$('bdPrice').textContent = yen(price);
+$('bdFee').textContent = '− ' + yen(fee);
+$('bdShipLabel').textContent = deliveryLabel;
+$('bdShip').textContent = '− ' + yen(delivery + (mode==='fba'? 0: 0));
+// breakdown: show other separately via total only; keep rows clear
+$('bdCost').textContent = '− ' + yen(cost + other);
+$('bdCostLabel').textContent = other > 0 ? '− 仕入れ価格＋その他経費' : '− 仕入れ価格';
+$('bdTotal').textContent = yen(totalCost);
+
+// badges
+var marginBadge = $('marginBadge'), roiBadge = $('roiBadge');
+if(price > 0){
+var margin = profit / price * 100;
+marginBadge.innerHTML = '利益率 <b>' + margin.toFixed(1) + '%</b>';
+marginBadge.classList.toggle('warn', margin < 0);
+} else {
+marginBadge.innerHTML = '利益率 <b>—</b>';
+marginBadge.classList.remove('warn');
+}
+if(cost > 0){
+var roi = profit / cost * 100;
+roiBadge.innerHTML = 'ROI <b>' + roi.toFixed(1) + '%</b>';
+roiBadge.classList.toggle('warn', roi < 0);
+} else {
+roiBadge.innerHTML = 'ROI <b>—</b>';
+roiBadge.classList.remove('warn');
+}
+
+// bar
+if(price > 0){
+var shipEtc = delivery + other;
+var pCost = Math.max(0, cost / price * 100);
+var pFee = Math.max(0, fee / price * 100);
+var pShip = Math.max(0, shipEtc / price * 100);
+var pProfit = Math.max(0, profit / price * 100);
+// if loss, profit bar is 0 and others may exceed 100 — scale to total
+var sum = pCost + pFee + pShip + pProfit;
+var scale = sum > 100? 100 / sum: 1;
+$('barCost').style.width = (pCost * scale) + '%';
+$('barFee').style.width = (pFee * scale) + '%';
+$('barShip').style.width = (pShip * scale) + '%';
+$('barProfit').style.width = (pProfit * scale) + '%';
+} else {
+$('barCost').style.width = '0%'; $('barFee').style.width = '0%';
+$('barShip').style.width = '0%'; $('barProfit').style.width = '0%';
+}
+
+// breakeven: price where profit = 0 → P*(1-rate) = cost+delivery+other
+var fixed = cost + delivery + other;
+var beEl = $('breakeven');
+var verdict = $('verdict');
+if(rate >= 100){
+beEl.textContent = '¥—';
+verdict.className = 'verdict'; verdict.textContent = '';
+} else {
+var be = Math.ceil(fixed / (1 - rate / 100));
+beEl.textContent = yen(be);
+if(price > 0 && profit >= 0){
+verdict.className = 'verdict show good';
+verdict.textContent = '黒字です。損益分岐点より ' + yen(price - be) + ' 高く売れています。';
+} else if(price > 0){
+verdict.className = 'verdict show bad';
+verdict.textContent = '赤字です。あと ' + yen(be - price) + ' 値上げするか、仕入れ・送料を下げると黒字になります。';
+} else {
+verdict.className = 'verdict'; verdict.textContent = '';
+}
+}
+return { price:price, cost:cost, rate:rate, fee:fee, delivery:delivery, other:other, totalCost:totalCost, profit:profit};
+}
+
+// category → rate
+catEl.addEventListener('change', function(){
+rateEl.value = catEl.value;
+calc();
+});
+// any input → calc
+[priceEl, costEl, rateEl, fbaFeeEl, storageEl, shipFeeEl, packingEl, otherEl].forEach(function(el){
+el.addEventListener('input', calc);
+});
+
+// mode toggle
+function setMode(next){
+mode = next;
+$('modeFba').setAttribute('aria-pressed', mode==='fba'? 'true': 'false');
+$('modeSelf').setAttribute('aria-pressed', mode==='self'? 'true': 'false');
+$('panelFba').hidden = mode!== 'fba';
+$('panelSelf').hidden = mode!== 'self';
+calc();
+}
+$('modeFba').addEventListener('click', function(){ setMode('fba');});
+$('modeSelf').addEventListener('click', function(){ setMode('self');});
+
+// chips
+function wireChips(containerId, inputEl){
+var box = $(containerId);
+var chips = box.querySelectorAll('.chip');
+chips.forEach(function(chip){
+chip.addEventListener('click', function(){
+chips.forEach(function(c){ c.setAttribute('aria-pressed','false');});
+chip.setAttribute('aria-pressed','true');
+inputEl.value = chip.getAttribute('data-fee');
+calc();
+});
+});
+inputEl.addEventListener('input', function(){
+// manual edit clears chip match highlight if no chip matches
+var matched = false;
+chips.forEach(function(c){
+var on = c.getAttribute('data-fee') === String(inputEl.value).trim();
+c.setAttribute('aria-pressed', on? 'true': 'false');
+if(on) matched = true;
+});
+});
+}
+wireChips('fbaChips', fbaFeeEl);
+wireChips('shipChips', shipFeeEl);
+
+// copy
+$('copyBtn').addEventListener('click', function(){
+var r = calc();
+var modeLabel = mode === 'fba'? 'FBA': '自己発送';
+var margin = r.price > 0? (r.profit / r.price * 100).toFixed(1) + '%': '—';
+var text = [
+'',
+'販売価格：' + yen(r.price),
+'仕入れ価格：' + yen(r.cost),
+'カテゴリ手数料（' + r.rate + '%）：−' + yen(r.fee),
+'配送（' + modeLabel + '）：−' + yen(r.delivery),
+'その他経費：−' + yen(r.other),
+'利益：' + yen(r.profit) + '（利益率 ' + margin + '）'
+].join('\n');
+function done(){
+var t = $('toast'); t.classList.add('show');
+setTimeout(function(){ t.classList.remove('show');}, 1800);
+}
+if(navigator.clipboard && navigator.clipboard.writeText){
+navigator.clipboard.writeText(text).then(done, done);
+} else {
+var ta = document.createElement('textarea');
+ta.value = text; document.body.appendChild(ta); ta.select();
+try { document.execCommand('copy');} catch(e){}
+document.body.removeChild(ta); done();
+}
+});
+
+// reset
+$('resetBtn').addEventListener('click', function(){
+priceEl.value=''; costEl.value=''; otherEl.value=0; storageEl.value=0;
+priceEl.focus();
+calc();
+});
+
+calc();
+})();
+</script>
+</body>
+</html>
